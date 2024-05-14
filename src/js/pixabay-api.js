@@ -1,4 +1,4 @@
-export async function getPictures(searchTerm) {
+export function getPictures(searchTerm) {
   const API_KEY = '43767722-bbce12454ab409ccbfe76519c'; // Ключ API Pixabay
   const BASE_URL = 'https://pixabay.com/api/'; // Базова URL API Pixabay
 
@@ -17,16 +17,14 @@ export async function getPictures(searchTerm) {
   });
 
   // Відправка HTTP-запиту
-  const response = await fetch(`${BASE_URL}?${searchParams}`);
+  return fetch(`${BASE_URL}?${searchParams}`)
+    .then(response => {
+      // Перевірка відповіді
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-  // Перевірка відповіді
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-
-  // Отримання JSON-даних
-  const data = await response.json();
-
-  // Повернення даних
-  return data;
+      // Отримання JSON-даних
+      return response.json();
+    });
 }

@@ -2,14 +2,23 @@ import { getPictures } from './js/pixabay-api.js';
 import { updateGallery, showErrorMessage, showLoader, hideLoader } from './js/render-functions.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+
+// Ініціалізація SimpleLightbox на верхньому рівні
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+  overlay: true,
+  close: true,
+  className: 'custom-lightbox',
+});
+
 // Змінні
 const searchForm = document.querySelector('.js-search');
 const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
-let lightbox; // Змінна для зберігання екземпляра SimpleLightbox
 
 // Обробник події пошуку
-searchForm.addEventListener('submit', async (event) => {
+searchForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
   // Очищення галереї
@@ -21,46 +30,30 @@ searchForm.addEventListener('submit', async (event) => {
   // Якщо пошуковий запит порожній, завершити роботу
   if (!searchTerm) return;
 
-  // Відображення індикатора завантаження
+  // Показати індикатор завантаження
   showLoader();
 
-  // Отримання зображень
   getPictures(searchTerm)
     .then(images => {
-      // Приховування індикатора завантаження
+      // Приховати індикатор завантаження
       hideLoader();
 
       // Перевірка наявності зображень
       if (!images.hits.length) {
-        showErrorMessage('Зображень не знайдено. Спробуйте інший пошуковий запит.');
+        showErrorMessage('Sorry, there are no images matching your search query. Please try again!n');
         return;
       }
 
       // Оновлення галереї
       updateGallery(images.hits);
 
-      // Ініціалізація SimpleLightbox 
-      if (!lightbox) {
-        lightbox = new SimpleLightbox('.gallery a', {
-          // Налаштування лайтбокса
-          caption: {
-            position: 'bottom',
-            className: 'lightbox-caption',
-          },
-          overlay: {
-            className: 'lightbox-overlay',
-          },
-          close: {
-            className: 'lightbox-close',
-          },
-          className: 'custom-lightbox',
-        });
-      }
-
       // Оновлення SimpleLightbox
       lightbox.refresh();
     })
     .catch(error => {
-      showErrorMessage(error.message);
+      // Приховати індикатор завантаження та показати повідомлення про помилку
+      hideLoader();
+      showErrorMessage('Щось пішло не так. Будь ласка, спробуйте ще раз.');
+      console.error(error);
     });
 });
